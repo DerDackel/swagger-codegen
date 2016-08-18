@@ -64,7 +64,8 @@ public class SpringOptionsTest extends JavaClientOptionsTest {
             times = 1;
             clientCodegen.setAsync(Boolean.valueOf(SpringOptionsProvider.ASYNC));
             times = 1;
-
+            clientCodegen.setJsonLibrary(SpringOptionsProvider.JSON_LIBRARY_VALUE);
+            times = 1;
         }};
     }
 }

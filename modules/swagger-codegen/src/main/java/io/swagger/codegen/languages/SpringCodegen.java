@@ -20,10 +20,14 @@ public class SpringCodegen extends AbstractJavaCodegen {
     public static final String ASYNC = "async";
     public static final String SPRING_MVC_LIBRARY = "spring-mvc";
     public static final String SPRING_CLOUD_LIBRARY = "spring-cloud";
+    public static final String JSON_LIBRARY = "jsonLibrary";
+    public static final String DEFAULT_JSON_LIBRARY = "jackson";
+    public static final String GSON_JSON_LIBRARY = "gson";
 
     protected String title = "swagger-petstore";
     protected String configPackage = "io.swagger.configuration";
     protected String basePackage = "io.swagger";
+    protected String jsonLibrary = "jackson";
     protected boolean interfaceOnly = false;
     protected boolean singleContentTypes = false;
     protected boolean java8 = false;
@@ -50,6 +54,15 @@ public class SpringCodegen extends AbstractJavaCodegen {
         cliOptions.add(CliOption.newBoolean(JAVA_8, "use java8 default interface"));
         cliOptions.add(CliOption.newBoolean(ASYNC, "use async Callable controllers"));
 
+        Map<String, String> supportedJsonLibraries = new LinkedHashMap<String, String>();
+        supportedJsonLibraries.put(DEFAULT_JSON_LIBRARY, "Jackson JSON serialization library");
+        supportedJsonLibraries.put(GSON_JSON_LIBRARY, "GSON JSON serialization library");
+
+        CliOption jsonLibrary = new CliOption(JSON_LIBRARY, "JSON serialization library to be used");
+        jsonLibrary.setEnum(supportedJsonLibraries);
+        jsonLibrary.setDefault(DEFAULT_JSON_LIBRARY);
+        cliOptions.add(jsonLibrary);
+
         supportedLibraries.put(DEFAULT_LIBRARY, "Spring-boot Server application using the SpringFox integration.");
         supportedLibraries.put(SPRING_MVC_LIBRARY, "Spring-MVC Server application using the SpringFox integration.");
         supportedLibraries.put(SPRING_CLOUD_LIBRARY, "Spring-Cloud-Feign client with Spring-Boot auto-configured settings.");
@@ -75,6 +88,10 @@ public class SpringCodegen extends AbstractJavaCodegen {
     @Override
     public String getHelp() {
         return "Generates a Java SpringBoot Server application using the SpringFox integration.";
+    }
+
+    public String getJsonLibrary() {
+        return jsonLibrary;
     }
 
     @Override
@@ -113,6 +130,10 @@ public class SpringCodegen extends AbstractJavaCodegen {
 
         if (additionalProperties.containsKey(ASYNC)) {
             this.setAsync(Boolean.valueOf(additionalProperties.get(ASYNC).toString()));
+        }
+
+        if (additionalProperties.containsKey(JSON_LIBRARY)) {
+            this.setJsonLibrary(additionalProperties.get(JSON_LIBRARY).toString());
         }
 
         supportingFiles.add(new SupportingFile("pom.mustache", "", "pom.xml"));
@@ -171,6 +192,8 @@ public class SpringCodegen extends AbstractJavaCodegen {
             importMapping.put("LocalDate", "java.time.LocalDate");
             importMapping.put("OffsetDateTime", "java.time.OffsetDateTime");
         }
+
+        additionalProperties.put(this.jsonLibrary, "true");
     }
 
     @Override
@@ -347,6 +370,10 @@ public class SpringCodegen extends AbstractJavaCodegen {
     public void setJava8(boolean java8) { this.java8 = java8; }
 
     public void setAsync(boolean async) { this.async = async; }
+
+    public void setJsonLibrary(String jsonLibrary) {
+        this.jsonLibrary = jsonLibrary;
+    }
 
     @Override
     public void postProcessModelProperty(CodegenModel model, CodegenProperty property) {
